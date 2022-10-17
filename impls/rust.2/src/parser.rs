@@ -1,9 +1,11 @@
+//! Parsing of strings into token streams.
 use std::{
     collections::HashMap,
     fmt::{self, Display, Formatter},
     num::ParseIntError,
 };
 
+/// Token types used in the process of tokenizing mal source code.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Token {
     LParen,
@@ -32,16 +34,23 @@ pub(crate) struct Parser {
     pos: usize,
 }
 
+/// Errors that can be raised while parsing.
 #[derive(Debug, PartialEq, Eq)]
 pub enum ParseError {
+    /// A character was encountered that was not expected, for example a string
+    /// with no closing quotation mark.
     UnexpectedCharacter {
         got: char,
         expected: Option<char>,
         pos: usize,
     },
+    /// The end of the input string was reached before parsing was completed.
     UnexpectedEndOfInput(usize),
-    ParseInt(ParseIntError, usize),
+    /// The parser encountered a backslash followed by a character that does not
+    /// form a known escape sequence.
     UnknownEscapeSequence(char, usize),
+    /// Parsing an integer value failed for some reason.
+    ParseInt(ParseIntError, usize),
 }
 
 impl Display for ParseError {

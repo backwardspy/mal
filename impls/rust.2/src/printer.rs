@@ -1,3 +1,4 @@
+//! Turning mal values into displayable strings.
 use std::collections::HashMap;
 
 use crate::types::{Atom, Value};
@@ -22,6 +23,43 @@ fn pr_list_items(items: Vec<Value>) -> String {
         .join(" ")
 }
 
+/// Format a mal value as a string.
+///
+/// # Arguments
+///
+/// * `pretty` - Enables pretty printing of strings. This means the string is
+/// formatted without delimiting quotes and escape sequences are interpreted.
+///
+/// # Examples
+///
+/// ```
+/// use mal::types::{Value, Atom};
+/// use mal::printer::pr_str;
+///
+/// let value = Value::Atom(Atom::Symbol("sym".to_owned()));
+/// assert_eq!(pr_str(value, false), "sym");
+///
+/// let value = Value::Atom(Atom::Keyword("kw".to_owned()));
+/// assert_eq!(pr_str(value, false), ":kw");
+///
+/// let value = Value::Atom(Atom::String("hello, world!".to_owned()));
+/// assert_eq!(pr_str(value, false), "\"hello, world!\"");
+///
+/// let value = Value::Atom(Atom::String("hello, world!".to_owned()));
+/// assert_eq!(pr_str(value, true), "hello, world!");
+///
+/// let value = Value::Atom(Atom::Int(42));
+/// assert_eq!(pr_str(value, false), "42");
+///
+/// let value = Value::Atom(Atom::Nil);
+/// assert_eq!(pr_str(value, true), "nil");
+///
+/// let value = Value::Atom(Atom::True);
+/// assert_eq!(pr_str(value, true), "true");
+///
+/// let value = Value::Atom(Atom::False);
+/// assert_eq!(pr_str(value, true), "false");
+/// ```
 pub fn pr_str(value: Value, pretty: bool) -> String {
     match value {
         Value::Atom(atom) => match atom {

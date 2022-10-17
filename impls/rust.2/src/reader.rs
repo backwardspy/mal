@@ -1,3 +1,4 @@
+//! Turning token streams into syntax trees.
 use std::{
     collections::HashMap,
     fmt::{self, Display, Formatter},
@@ -8,16 +9,24 @@ use crate::{
     types::{Atom, Value},
 };
 
+/// Errors that can be raised while reading.
 #[derive(Debug, PartialEq, Eq)]
 pub enum ReadError {
+    /// A token was encountered that was not expected, for example a closing
+    /// brace with no matching opening brace.
     UnexpectedToken {
         got: Token,
         expected: Option<Token>,
         pos: usize,
     },
+    /// The end of the token stream was reached before reading could be
+    /// completed.
     UnexpectedEndOfInput(usize),
+    /// A hash-map was encountered with an unhashable type as a key.
     UnhashableType(Value, usize),
+    /// A hash-map was encountered with an odd number of items.
     UnevenHashMap(usize),
+    /// An error occurred while parsing the input string.
     Parse(ParseError),
 
     // "special" error that signals the repl to do nothing
@@ -188,6 +197,30 @@ impl Iterator for Reader {
     }
 }
 
+/// Interpret a string into a mal value.
+///
+/// `input` is tokenized and parsed into a tree of [Value](crate::types::Value)
+/// nodes. The root of the tree is returned.
+///
+/// # Arguments
+///
+/// * `input` - A string slice containing some mal source code.
+///
+/// # Examples
+///
+/// ```
+/// use mal::types::{Atom, Value};
+/// use mal::reader::read_str;
+///
+/// let value = read_str("(42 6502)").unwrap();
+/// assert_eq!(
+///     value,
+///     Value::List(vec![
+///         Value::Atom(Atom::Int(42)),
+///         Value::Atom(Atom::Int(6502))
+///     ])
+/// );
+/// ```
 pub fn read_str(input: &str) -> Result<Value, ReadError> {
     let tokens = tokenize(input).map_err(ReadError::Parse)?;
     if tokens.is_empty() {
